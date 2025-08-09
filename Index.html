@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jazz de Chapa: O Ritmo do Sabor Soul Jazz Burger</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Cores inspiradas na Soul Jazz Burger */
+        :root {
+            --primary-dark: #2c3e50; /* Azul escuro/quase preto */
+            --secondary-accent: #f39c12; /* Laranja jazz */
+            --light-text: #ecf0f1; /* Cinza claro para texto */
+            --dark-text: #34495e; /* Azul médio para texto */
+            --success-green: #27ae60;
+            --error-red: #e74c3c;
+            --btn-bg: #3498db; /* Azul padrão para botões */
+            --btn-hover: #2980b9;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--primary-dark);
+            color: var(--light-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            text-align: center;
+            touch-action: manipulation; /* Improves touch responsiveness */
+        }
+
+        #game-container {
+            background-color: #1a252f;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        #logo {
+            max-width: 150px;
+            margin: 0 auto 15px auto;
+            display: block;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            color: var(--secondary-accent);
+            font-size: 2em;
+            margin-bottom: 10px;
+            letter-spacing: 1.5px;
+        }
+
+        #scoreboard {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.6em; /* Adjusted font size for mobile */
+            color: var(--light-text);
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+        #scoreboard span {
+            font-size: 1em;
+        }
+        #scoreboard .score-line {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+
+        #timer-display {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            color: var(--success-green);
+            margin-bottom: 10px;
+        }
+
+        #order-display {
+            background-color: var(--dark-text);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        #current-burger-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            color: var(--secondary-accent);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #info-button {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            font-size: 0.9em;
+            margin-left: 10px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        #info-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #required-ingredients {
+            font-size: 1em;
+            color: var(--light-text);
+            font-style: italic;
+        }
+
+        .ingredient-selection {
+            margin-bottom: 15px;
+            text-align: left;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+            /* Control visibility with JavaScript */
+            display: none; 
+        }
+        .ingredient-selection.active {
+            display: block;
+        }
+
+        .ingredient-selection h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            color: var(--secondary-accent);
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .ingredient-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .ingredient-buttons button {
+            background-color: var(--btn-bg);
+            color: var(--light-text);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            text-transform: uppercase;
+            font-family: 'Roboto', sans-serif;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+            flex: 1 1 calc(33% - 8px); /* 3 buttons per row for most screens */
+            min-width: 90px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            user-select: none;
+        }
+
+        .ingredient-buttons button:hover:not(:disabled) {
+            background-color: var(--btn-hover);
+            transform: translateY(-2px);
+        }
+
+        .ingredient-buttons button.selected {
+            background-color: var(--secondary-accent);
+            box-shadow: 0 0 10px var(--secondary-accent);
+        }
+
+        .ingredient-buttons button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #submit-order-btn {
+            background-color: var(--success-green);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            display: none; /* Controlled by JS */
+        }
+
+        #submit-order-btn:hover:not(:disabled) {
+            background-color: #219d53;
+        }
+        #submit-order-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        #start-game-btn {
+            background-color: var(--secondary-accent);
+            color: var(--primary-dark);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 1px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #start-game-btn:hover {
+            background-color: #e68a00;
+        }
+
+        #message-area {
+            min-height: 40px;
+            font-size: 1.1em;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .message-success {
+            color: var(--success-green);
+        }
+
+        .message-error {
+            color: var(--error-red);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #1a252f;
+            margin: auto;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .close-button {
+            color: var(--light-text);
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: var(--secondary-accent);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            color: var(--secondary-accent);
+            font-size: 1.6em;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            font-size: 1em;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        .modal-content ul {
+            text-align: left;
+            list-style-type: disc;
+            margin-left: 20px;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 480px) {
+            .ingredient-buttons button {
+                flex: 1 1 calc(50% - 8px); /* 2 buttons per row on very small screens */
+            }
+            #scoreboard {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Logo da Soul Jazz Burger (certifique-se de que 'logo.png' esteja na mesma pasta) -->
+        <img id="logo" src="logo.png" alt="Soul Jazz Burger Logo">
+        
+        <h1>Jazz de Chapa: O Ritmo do Sabor</h1>
+        <button id="start-game-btn">Começar Turno</button>
+
+        <div id="game-elements" style="display: none;">
+            <div id="scoreboard">
+                <span class="score-line">Pontuação: <span id="score-value">0</span> | Combo: <span id="combo-value">0</span></span>
+                <span class="score-line">Completos: <span id="completed-value">0</span> | Parcial: <span id="partial-value">0</span> | Erro: <span id="error-value">0</span></span>
+            </div>
+            <div id="timer-display">Tempo: <span id="time-value">20</span>s</div>
+
+            <div id="order-display">
+                <p>Próximo Pedido:</p>
+                <h2 id="current-burger-name">
+                    <span id="burger-name-text"></span> 
+                    <button id="info-button" title="Ver Composição">ⓘ</button>
+                </h2>
+                <p id="required-ingredients">Selecione os ingredientes para a chapa:</p>
+            </div>
+
+            <!-- Meat Selection Section -->
+            <div id="meat-section" class="ingredient-selection">
+                <h3>Tipo de Carne:</h3>
+                <div id="meat-buttons" class="ingredient-buttons">
+                    <button data-type="meat" data-value="smash_90g">Smash 90g</button>
+                    <button data-type="meat" data-value="fraldinha_150g">Fraldinha 150g</button>
+                    <button data-type="meat" data-value="angus_180g">Angus 180g</button>
+                    <button data-type="meat" data-value="trancado">Trançado</button>
+                    <button data-type="meat" data-value="suino">Suíno</button>
+                    <button data-type="meat" data-value="frango">Frango</button>
+                    <button data-type="meat" data-value="fraldinha_duplo">Fraldinha Duplo</button>
+                    <button data-type="meat" data-value="smash_duplo">Smash Duplo</button>
+                    <button data-type="meat" data-value="fraldinha_mais_suino">Fraldinha + Suíno</button>
+                    <button data-type="meat" data-value="fritadeira">Fritadeira</button>
+                </div>
+            </div>
+
+            <!-- Cheese Selection Section -->
+            <div id="cheese-section" class="ingredient-selection">
+                <h3>Tipo de Queijo:</h3>
+                <div id="cheese-buttons" class="ingredient-buttons">
+                    <button data-type="cheese" data-value="mussarela">Mussarela</button>
+                    <button data-type="cheese" data-value="cheddar">Cheddar</button>
+                    <button data-type="cheese" data-value="canastra">Canastra</button>
+                    <button data-type="cheese" data-value="mussarela_dupla">Mussarela Dupla</button>
+                    <button data-type="cheese" data-value="nenhum">Sem Queijo</button>
+                </div>
+            </div>
+
+            <!-- Extras Selection Section -->
+            <div id="extras-section" class="ingredient-selection">
+                <h3>Extras (na Chapa):</h3>
+                <div id="extras-buttons" class="ingredient-buttons">
+                    <button data-type="extra" data-value="ovo">Ovo</button>
+                    <button data-type="extra" data-value="bacon_fatia">Bacon Fatia</button>
+                </div>
+            </div>
+
+            <button id="submit-order-btn">Servir Pedido</button>
+            <div id="message-area"></div>
+        </div>
+    </div>
+
+    <!-- Modal para Composição do Hambúrguer -->
+    <div id="composition-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="modal-burger-name"></h3>
+            <p><strong>Pão:</strong> <span id="modal-pao"></span></p>
+            <p><strong>Carne:</strong> <span id="modal-carne"></span></p>
+            <p><strong>Queijo:</strong> <span id="modal-queijo"></span></p>
+            <p><strong>Molho:</strong> <span id="modal-molho"></span></p>
+            <p><strong>Outros Ingredientes:</strong></p>
+            <ul id="modal-outros-ingredientes"></ul>
+        </div>
+    </div>
+
+    <script>
+        const menuData = [
+            // ==================== SMASH BURGERS ====================
+            { 
+                name: "SMASH BLUES", 
+                chapa_ingredients: { meat: "smash_90g", cheese: "mussarela", extras: [] },
+                full_composition: { pao: "brioche", carne: "smash de fraldinha 90g", queijo: "mussarela", molho: "barbecue", outros_ingredientes: ["farofinha de bacon", "picles"] }
+            },
+            { 
+                name: "SMASH ROCK", 
+                chapa_ingredients: { meat: "smash_duplo", cheese: "cheddar", extras: [] },
+                full_composition: { pao: "brioche", carne: "duplo smash de fraldinha 90g", queijo: "cheddar", molho: "aioli", outros_ingredientes: ["farofinha de bacon", "picles", "cebola roxa", "alface"] }
+            },
+            { 
+                name: "SMASH JAZZ", 
+                chapa_ingredients: { meat: "smash_90g", cheese: "mussarela", extras: ["ovo"] },
+                full_composition: { pao: "australiano", carne: "smash de fraldinha 90g", queijo: "mussarela", molho: "aioli", outros_ingredientes: ["ovo", "tomate", "alface", "cebola caramelizada"] }
+            },
+            { 
+                name: "SMASH SOUL", 
+                chapa_ingredients: { meat: "smash_90g", cheese: "cheddar", extras: [] },
+                full_composition: { pao: "australiano", carne: "blend de fraldinha 90g", queijo: "cheddar", molho: "barbecue", outros_ingredientes: ["cebola caramelizada"] }
+            },
+            { 
+                name: "ABC (INFANTIL)", 
+                chapa_ingredients: { meat: "smash_90g", cheese: "cheddar", extras: [] },
+                full_composition: { pao: "mini brioche", carne: "blend de fraldinha 90g", queijo: "cheddar", molho: "barbecue", outros_ingredientes: [] }
+            },
+            // ==================== BURGERS ESPECIAIS ====================
+            { 
+                name: "TAKE FIVE", 
+                chapa_ingredients: { meat: "fraldinha_150g", cheese: "cheddar", extras: ["bacon_fatia"] },
+                full_composition: { pao: "australiano", carne: "fraldinha 150g", queijo: "cheddar", molho: "aioli", outros_ingredientes: ["bacon", "tomate", "alface", "cebola caramelizada"] }
+            },
+            { 
+                name: "FEVER", 
+                chapa_ingredients: { meat: "fraldinha_150g", cheese: "mussarela", extras: ["bacon_fatia"] },
+                full_composition: { pao: "focaccia", carne: "fraldinha 150g", queijo: "mussarela", molho: "barbecue", outros_ingredientes: ["onion rings", "bacon"] }
+            },
+            { 
+                name: "SUMMERTIME", 
+                chapa_ingredients: { meat: "trancado", cheese: "mussarela", extras: ["ovo", "bacon_fatia"] },
+                full_composition: { pao: "australiano", carne: "fraldinha 150g (trançado)", queijo: "mussarela", molho: "N/A", outros_ingredientes: ["bacon", "cebola caramelizada", "alface", "ovo"] }
+            },
+            { 
+                name: "QUE BELEZA", 
+                chapa_ingredients: { meat: "fraldinha_150g", cheese: "mussarela", extras: [] },
+                full_composition: { pao: "brioche", carne: "fraldinha 150g", queijo: "mussarela", molho: "barbecue", outros_ingredientes: ["picles"] }
+            },
+            { 
+                name: "HEY PACHUCO", 
+                chapa_ingredients: { meat: "fraldinha_150g", cheese: "mussarela", extras: [] },
+                full_composition: { pao: "australiano", carne: "fraldinha 150g", queijo: "mussarela", molho: "sour cream", outros_ingredientes: ["guacamole", "pimentas jalapeño"] }
+            },
+            { 
+                name: "BACOMPLETO", 
+                chapa_ingredients: { meat: "fraldinha_150g", cheese: "mussarela", extras: ["bacon_fatia", "bacon_fatia"] }, // Duplo bacon
+                full_composition: { pao: "focaccia", carne: "fraldinha 150g", queijo: "mussarela", molho: "barbecue", outros_ingredientes: ["duplo bacon", "cebola caramelizada"] }
+            },
+            { 
+                name: "SOUL POWER", 
+                chapa_ingredients: { meat: "fraldinha_150g", cheese: "canastra", extras: [] },
+                full_composition: { pao: "focaccia", carne: "fraldinha 150g", queijo: "canastra", molho: "N/A", outros_ingredientes: ["3 sticks de queijo canastra empanados", "farofinha de bacon", "alface", "cebola caramelizada"] }
+            },
+            { 
+                name: "SURF & TURF", 
+                chapa_ingredients: { meat: "fraldinha_150g", cheese: "cheddar", extras: [] },
+                full_composition: { pao: "focaccia", carne: "fraldinha 150g", queijo: "cheddar", molho: "creme de cogumelos com creamcheese", outros_ingredientes: ["camarões empanados"] }
+            },
+            { 
+                name: "MANISH BOY", 
+                chapa_ingredients: { meat: "fraldinha_duplo", cheese: "cheddar", extras: ["bacon_fatia"] },
+                full_composition: { pao: "brioche", carne: "fraldinha (duplo)", queijo: "cheddar", molho: "aioli", outros_ingredientes: ["bacon", "tomate", "alface", "cebola caramelizada"] }
+            },
+            { 
+                name: "SO WHAT", 
+                chapa_ingredients: { meat: "fraldinha_mais_suino", cheese: "mussarela_dupla", extras: [] },
+                full_composition: { pao: "N/A", carne: "fraldinha + pernil/linguiça/bacon", queijo: "mussarela (dupla)", molho: "N/A", outros_ingredientes: ["farofinha de bacon", "onion rings", "jalapeños", "rúcula"] }
+            },
+            { 
+                name: "HIT THE ROAD - PREMIUM", 
+                chapa_ingredients: { meat: "angus_180g", cheese: "nenhum", extras: ["bacon_fatia"] },
+                full_composition: { pao: "brioche", carne: "angus 180g", queijo: "emmental", molho: "redução de balsâmico", outros_ingredientes: ["bacon caramelizado", "alho frito crocante", "rúcula"] }
+            },
+            { 
+                name: "BACK TO BLACK - PREMIUM", 
+                chapa_ingredients: { meat: "angus_180g", cheese: "cheddar", extras: ["bacon_fatia"] },
+                full_composition: { pao: "focaccia", carne: "angus 180g", queijo: "cheddar", molho: "barbecue / redução de balsâmico", outros_ingredientes: ["cebola baby caramelizada", "bacon"] }
+            },
+            { 
+                name: "FEELING GOOD - PREMIUM", 
+                chapa_ingredients: { meat: "angus_180g", cheese: "cheddar", extras: [] },
+                full_composition: { pao: "brioche", carne: "angus 180g", queijo: "cheddar", molho: "barbecue", outros_ingredientes: ["cebola roxa", "picles", "alface", "tomate"] }
+            },
+            { 
+                name: "SUNRISE - PREMIUM", 
+                chapa_ingredients: { meat: "angus_180g", cheese: "mussarela", extras: [] },
+                full_composition: { pao: "focaccia", carne: "angus 180g", queijo: "mussarela", molho: "barbecue / creme de cogumelos", outros_ingredientes: ["farofinha de bacon", "onion rings"] }
+            },
+            { 
+                name: "VOLARE - PREMIUM", 
+                chapa_ingredients: { meat: "angus_180g", cheese: "canastra", extras: [] },
+                full_composition: { pao: "ciabatta", carne: "angus 180g", queijo: "canastra", molho: "redução de balsâmico", outros_ingredientes: ["tomate confit", "rúcula", "alho frito"] }
+            },
+            { 
+                name: "FREEDOM", 
+                chapa_ingredients: { meat: "frango", cheese: "cheddar", extras: ["bacon_fatia"] },
+                full_composition: { pao: "ciabatta", carne: "frango", queijo: "cheddar", molho: "aioli", outros_ingredientes: ["bacon", "cebola baby caramelizada", "alface"] }
+            },
+            { 
+                name: "KILÁRIO", 
+                chapa_ingredients: { meat: "suino", cheese: "canastra", extras: ["bacon_fatia"] },
+                full_composition: { pao: "focaccia", carne: "pernil, linguiça e bacon", queijo: "canastra", molho: "barbecue de goiabada", outros_ingredientes: ["bacon", "alface"] }
+            },
+            { 
+                name: "SMILES", 
+                chapa_ingredients: { meat: "suino", cheese: "canastra", extras: [] },
+                full_composition: { pao: "ciabatta", carne: "pernil, linguiça e bacon", queijo: "canastra", molho: "redução de balsâmico", outros_ingredientes: ["cebola marinada", "crispy de couve"] }
+            },
+            // ==================== VEGETARIANOS (Fritadeira) ====================
+            { 
+                name: "AT LAST", 
+                chapa_ingredients: { meat: "fritadeira", cheese: "mussarela", extras: [] }, // Queijo do hambúrguer, mas na chapa só Fritadeira importa
+                full_composition: { pao: "australiano", carne: "grão de bico empanado", queijo: "mussarela", molho: "aioli", outros_ingredientes: ["cebola caramelizada", "rúcula"] }
+            },
+            { 
+                name: "LUCKY (VEGANO)", 
+                chapa_ingredients: { meat: "fritadeira", cheese: "nenhum", extras: [] },
+                full_composition: { pao: "ciabatta", carne: "cogumelos", queijo: "Nenhum (Vegano)", molho: "barbecue", outros_ingredientes: ["cebola caramelizada", "tomate", "alface"] }
+            },
+            { 
+                name: "ROCKIN' ROBIN", 
+                chapa_ingredients: { meat: "fritadeira", cheese: "cheddar", extras: [] }, // Queijo do hambúrguer, mas na chapa só Fritadeira importa
+                full_composition: { pao: "focaccia", carne: "falafel", queijo: "cheddar", molho: "barbecue / creme de cogumelos com cream cheese", outros_ingredientes: ["onion rings"] }
+            },
+            { 
+                name: "RESPECT (VEGANO)", 
+                chapa_ingredients: { meat: "fritadeira", cheese: "nenhum", extras: [] },
+                full_composition: { pao: "ciabatta", carne: "falafel", queijo: "Requeijão de castanha de caju (Vegano)", molho: "N/A", outros_ingredientes: ["coulis de pimentão vermelho", "tomate confit", "cebola marinada"] }
+            }
+        ];
+
+        const game = {
+            score: 0,
+            combo: 0,
+            completedOrders: 0,
+            partialOrders: 0,
+            errorOrders: 0,
+            currentOrder: null,
+            selectedIngredients: {
+                meat: null,
+                cheese: null,
+                extras: []
+            },
+            timer: null,
+            timeLeft: 0,
+            timePerRound: 20,
+            baseScorePerIngredient: 100,
+            perfectOrderBonus: 200,
+            comboBonusMultiplier: 0.1,
+            gameActive: false,
+            currentPhase: 'meat' // 'meat', 'cheese', 'extras'
+        };
+
+        // DOM Elements
+        const startGameBtn = document.getElementById('start-game-btn');
+        const gameElements = document.getElementById('game-elements');
+        const scoreValue = document.getElementById('score-value');
+        const comboValue = document.getElementById('combo-value');
+        const completedValue = document.getElementById('completed-value');
+        const partialValue = document.getElementById('partial-value');
+        const errorValue = document.getElementById('error-value');
+        const timeValue = document.getElementById('time-value');
+        const burgerNameText = document.getElementById('burger-name-text');
+        const infoButton = document.getElementById('info-button');
+        
+        const meatSection = document.getElementById('meat-section');
+        const cheeseSection = document.getElementById('cheese-section');
+        const extrasSection = document.getElementById('extras-section');
+
+        const meatButtonsDiv = document.getElementById('meat-buttons');
+        const cheeseButtonsDiv = document.getElementById('cheese-buttons');
+        const extrasButtonsDiv = document.getElementById('extras-buttons');
+        
+        const submitOrderBtn = document.getElementById('submit-order-btn');
+        const messageArea = document.getElementById('message-area');
+
+        // Modal Elements
+        const compositionModal = document.getElementById('composition-modal');
+        const closeModalButton = document.querySelector('.close-button');
+        const modalBurgerName = document.getElementById('modal-burger-name');
+        const modalPao = document.getElementById('modal-pao');
+        const modalCarne = document.getElementById('modal-carne');
+        const modalQueijo = document.getElementById('modal-queijo');
+        const modalMolho = document.getElementById('modal-molho');
+        const modalOutrosIngredientes = document.getElementById('modal-outros-ingredientes');
+
+        // Event Listeners
+        startGameBtn.addEventListener('click', startGame);
+        
+        // Delegated event listeners for ingredient buttons
+        meatButtonsDiv.addEventListener('click', (e) => selectIngredient(e, 'meat'));
+        cheeseButtonsDiv.addEventListener('click', (e) => selectIngredient(e, 'cheese'));
+        extrasButtonsDiv.addEventListener('click', (e) => selectIngredient(e, 'extra'));
+        
+        submitOrderBtn.addEventListener('click', submitOrder);
+
+        // Modal Event Listeners
+        infoButton.addEventListener('click', showCompositionModal);
+        closeModalButton.addEventListener('click', () => compositionModal.style.display = 'none');
+        window.addEventListener('click', (event) => {
+            if (event.target === compositionModal) {
+                compositionModal.style.display = 'none';
+            }
+        });
+
+        function startGame() {
+            game.score = 0;
+            game.combo = 0;
+            game.completedOrders = 0;
+            game.partialOrders = 0;
+            game.errorOrders = 0;
+            game.gameActive = true;
+            startGameBtn.style.display = 'none';
+            gameElements.style.display = 'flex';
+            updateUI();
+            startRound();
+        }
+
+        function startRound() {
+            if (!game.gameActive) return;
+
+            resetSelections();
+            messageArea.textContent = '';
+            game.currentOrder = menuData[Math.floor(Math.random() * menuData.length)];
+            burgerNameText.textContent = game.currentOrder.name;
+
+            // Reset UI for new round
+            meatSection.classList.remove('active');
+            cheeseSection.classList.remove('active');
+            extrasSection.classList.remove('active');
+            submitOrderBtn.style.display = 'none';
+            
+            enableButtons(meatButtonsDiv);
+            disableButtons(cheeseButtonsDiv);
+            disableButtons(extrasButtonsDiv);
+            
+            game.currentPhase = 'meat';
+            meatSection.classList.add('active'); // Show meat selection
+
+            game.timeLeft = game.timePerRound;
+            timeValue.textContent = game.timeLeft;
+
+            clearInterval(game.timer);
+            game.timer = setInterval(updateTimer, 1000);
+
+            // Special logic for Fritadeira burgers
+            if (game.currentOrder.chapa_ingredients.meat === 'fritadeira') {
+                // Only enable 'fritadeira' button in meat section
+                Array.from(meatButtonsDiv.children).forEach(button => {
+                    if (button.dataset.value !== 'fritadeira') {
+                        button.disabled = true;
+                    }
+                });
+                // Disable other sections from being selected
+                disableButtons(cheeseButtonsDiv);
+                disableButtons(extrasButtonsDiv);
+            }
+        }
+
+        function updateTimer() {
+            game.timeLeft--;
+            timeValue.textContent = game.timeLeft;
+
+            if (game.timeLeft <= 5) {
+                timeValue.style.color = 'var(--error-red)';
+            } else {
+                timeValue.style.color = 'var(--success-green)';
+            }
+
+            if (game.timeLeft <= 0) {
+                clearInterval(game.timer);
+                showMessage("Pedido cancelado! Tempo esgotado.", 'error');
+                game.errorOrders++; // Increment error count
+                game.combo = 0; // Break combo on timeout
+                updateUI();
+                setTimeout(startRound, 2000);
+            }
+        }
+
+        function selectIngredient(event, type) {
+            const button = event.target.closest('button');
+            if (!button || button.disabled || !game.gameActive) return;
+
+            const value = button.dataset.value;
+
+            // Handle selection styling
+            const parentDiv = button.closest('.ingredient-buttons');
+            
+            if (type === 'extra') {
+                // For extras, allow multiple selections
+                if (game.selectedIngredients.extras.includes(value)) {
+                    game.selectedIngredients.extras = game.selectedIngredients.extras.filter(item => item !== value);
+                    button.classList.remove('selected');
+                } else {
+                    game.selectedIngredients.extras.push(value);
+                    button.classList.add('selected');
+                }
+            } else {
+                parentDiv.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
+                game.selectedIngredients[type] = value;
+                button.classList.add('selected');
+            }
+
+            // --- Step-by-step flow ---
+            if (game.currentOrder.chapa_ingredients.meat === 'fritadeira') {
+                // For fritadeira burgers, selection of fritadeira is immediate submission
+                if (type === 'meat' && value === 'fritadeira') {
+                    disableButtons(meatButtonsDiv); // Lock meat selection
+                    setTimeout(() => submitOrder(true), 500); // Pass true to indicate immediate submission
+                }
+            } else {
+                // Regular burger flow
+                if (type === 'meat' && game.currentPhase === 'meat') {
+                    disableButtons(meatButtonsDiv); // Lock meat selection
+                    checkIntermediateSelection('meat', value); // Provide feedback
+                    setTimeout(() => {
+                        cheeseSection.classList.add('active'); // Show cheese
+                        enableButtons(cheeseButtonsDiv);
+                        game.currentPhase = 'cheese';
+                    }, 1000);
+                } else if (type === 'cheese' && game.currentPhase === 'cheese') {
+                    disableButtons(cheeseButtonsDiv); // Lock cheese selection
+                    checkIntermediateSelection('cheese', value); // Provide feedback
+                    setTimeout(() => {
+                        extrasSection.classList.add('active'); // Show extras
+                        enableButtons(extrasButtonsDiv);
+                        submitOrderBtn.style.display = 'block'; // Show submit button
+                        game.currentPhase = 'extras';
+                    }, 1000);
+                }
+            }
+        }
+
+        function checkIntermediateSelection(category, selectedValue) {
+            const requiredValue = game.currentOrder.chapa_ingredients[category];
+            if (selectedValue === requiredValue) {
+                showMessage(`✅ ${category.charAt(0).toUpperCase() + category.slice(1)} Correto!`, 'success');
+            } else {
+                showMessage(`❌ ${category.charAt(0).toUpperCase() + category.slice(1)} Errado! Era: ${requiredValue.replace('_', ' ')}.`, 'error');
+            }
+        }
+        
+        function resetSelections() {
+            game.selectedIngredients = {
+                meat: null,
+                cheese: null,
+                extras: []
+            };
+            document.querySelectorAll('.ingredient-buttons button').forEach(button => {
+                button.classList.remove('selected');
+            });
+        }
+
+        function enableButtons(div) {
+            Array.from(div.children).forEach(button => button.disabled = false);
+        }
+
+        function disableButtons(div) {
+            Array.from(div.children).forEach(button => button.disabled = true);
+        }
+
+        function submitOrder(isFritadeiraImmediate = false) {
+            if (!game.gameActive) return;
+
+            clearInterval(game.timer);
+            let roundScore = 0;
+            let correctCount = 0;
+            let totalExpectedCount = 0;
+            let perfectOrder = true; // Assume perfect until proven otherwise
+
+            const requiredChapa = game.currentOrder.chapa_ingredients;
+
+            // --- Logic for 'Fritadeira' burgers ---
+            if (requiredChapa.meat === 'fritadeira') {
+                totalExpectedCount = 1; // Only the 'fritadeira' meat is expected
+                if (game.selectedIngredients.meat === 'fritadeira' && 
+                    game.selectedIngredients.cheese === null && 
+                    game.selectedIngredients.extras.length === 0) {
+                    
+                    roundScore += game.baseScorePerIngredient;
+                    correctCount = 1;
+                    game.completedOrders++;
+                    showMessage(`Fritadeira Perfeita! +${roundScore} pontos!`, 'success');
+                } else {
+                    perfectOrder = false;
+                    game.errorOrders++;
+                    showMessage(`Erro na Fritadeira! Selecione apenas 'Fritadeira'.`, 'error');
+                }
+            } else {
+            // --- Logic for all other burgers ---
+                totalExpectedCount = 2 + requiredChapa.extras.length; // Meat + Cheese + Number of required extras
+
+                // Check Meat
+                if (game.selectedIngredients.meat === requiredChapa.meat) {
+                    roundScore += game.baseScorePerIngredient;
+                    correctCount++;
+                } else {
+                    perfectOrder = false;
+                }
+
+                // Check Cheese
+                if (game.selectedIngredients.cheese === requiredChapa.cheese) {
+                    roundScore += game.baseScorePerIngredient;
+                    correctCount++;
+                } else {
+                    perfectOrder = false;
+                }
+
+                // Check Extras
+                const selectedExtrasSorted = [...game.selectedIngredients.extras].sort();
+                const requiredExtrasSorted = [...requiredChapa.extras].sort();
+
+                if (JSON.stringify(selectedExtrasSorted) === JSON.stringify(requiredExtrasSorted)) {
+                    roundScore += requiredChapa.extras.length * game.baseScorePerIngredient;
+                    correctCount += requiredChapa.extras.length;
+                } else {
+                    perfectOrder = false;
+                }
+
+                // Determine order category (Completos, Parcial, Erro)
+                if (perfectOrder) {
+                    game.completedOrders++;
+                    showMessage(`Acerto Perfeito! +${roundScore} pontos! Combo x${game.combo + 1}!`, 'success');
+                } else if (correctCount > 0) {
+                    game.partialOrders++;
+                    showMessage(`Parcial! ${correctCount}/${totalExpectedCount} ingredientes corretos. Combo quebrado.`, 'error');
+                } else {
+                    game.errorOrders++;
+                    showMessage(`Erro! Nenhum ingrediente correto. Combo quebrado.`, 'error');
+                }
+            }
+
+
+            // Update combo and main score
+            if (perfectOrder) {
+                game.combo++;
+                game.score += roundScore + (game.combo * game.comboBonusMultiplier * roundScore);
+                
+                const timeBonus = Math.floor(game.timeLeft * (game.baseScorePerIngredient / game.timePerRound));
+                if (game.timeLeft > 0) {
+                    game.score += timeBonus;
+                    showMessage(messageArea.textContent + ` Bônus de Tempo: +${timeBonus} pontos!`, 'success');
+                }
+            } else {
+                game.combo = 0; // Break combo
+                game.score += roundScore; // Add points for correct ingredients in partial orders
+            }
+            
+            updateUI();
+            setTimeout(startRound, 2000);
+        }
+
+        function updateUI() {
+            scoreValue.textContent = game.score;
+            comboValue.textContent = game.combo;
+            completedValue.textContent = game.completedOrders;
+            partialValue.textContent = game.partialOrders;
+            errorValue.textContent = game.errorOrders;
+        }
+
+        function showMessage(msg, type) {
+            messageArea.textContent = msg;
+            messageArea.className = '';
+            messageArea.classList.add(type === 'success' ? 'message-success' : 'message-error');
+        }
+
+        function showCompositionModal() {
+            if (!game.currentOrder) return;
+
+            const fullComp = game.currentOrder.full_composition;
+            modalBurgerName.textContent = game.currentOrder.name;
+            modalPao.textContent = fullComp.pao || 'Não especificado';
+            modalCarne.textContent = fullComp.carne || 'Não especificada';
+            modalQueijo.textContent = fullComp.queijo || 'Não especificado';
+            modalMolho.textContent = fullComp.molho || 'Não especificado';
+            
+            modalOutrosIngredientes.innerHTML = '';
+            if (fullComp.outros_ingredientes && fullComp.outros_ingredientes.length > 0) {
+                fullComp.outros_ingredientes.forEach(ing => {
+                    const li = document.createElement('li');
+                    li.textContent = ing;
+                    modalOutrosIngredientes.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'Nenhum adicional.';
+                modalOutrosIngredientes.appendChild(li);
+            }
+
+            compositionModal.style.display = 'flex';
+        }
+
+        // Initial UI update
+        updateUI();
+
+    </script>
+</body>
+</html>
